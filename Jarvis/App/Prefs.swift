@@ -3,6 +3,16 @@ import Security
 
 /// Kullanıcı ayarları. API anahtarı Keychain'de, gerisi UserDefaults'ta.
 enum Prefs {
+    /// Ses hattı: "full" gpt-realtime, "mini" gpt-realtime-mini, "local" Apple tanıma + küçük metin modeli + Apple sesi.
+    static let pipelines: [(id: String, label: String)] = [
+        ("full", "Tam · gpt-realtime (en iyi Türkçe, ~0,07 $/dk)"),
+        ("mini", "Ekonomik · gpt-realtime-mini (~0,02 $/dk)"),
+        ("local", "Yerel · Apple tanıma + gpt-4o-mini + Apple sesi (neredeyse ücretsiz)"),
+    ]
+    static var pipeline: String {
+        get { UserDefaults.standard.string(forKey: "pipeline") ?? (model == "gpt-realtime-mini" ? "mini" : "full") }
+        set { UserDefaults.standard.set(newValue, forKey: "pipeline") }
+    }
     static let models = ["gpt-realtime-mini", "gpt-realtime"]
     static let voices = ["marin", "cedar", "alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse"]
 

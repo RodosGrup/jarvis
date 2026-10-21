@@ -5,6 +5,7 @@
   <img alt="Swift" src="https://img.shields.io/badge/Swift-5-F05138?style=flat-square&logo=swift&logoColor=white">
   <img alt="OpenAI Realtime" src="https://img.shields.io/badge/OpenAI-Realtime-412991?style=flat-square&logo=openai&logoColor=white">
   <img alt="Yerel ses tanıma" src="https://img.shields.io/badge/Ses%20tan%C4%B1ma-yerel-1f8a70?style=flat-square">
+  <img alt="MIT" src="https://img.shields.io/badge/Lisans-MIT-3b82f6?style=flat-square">
   <img alt="Rodosgrup test projesi" src="https://img.shields.io/badge/Rodosgrup-test%20projesi-6b7280?style=flat-square">
 </p>
 
@@ -25,7 +26,7 @@ Jarvis: "Web projesi bitirdi: 42 test geçti, iki uyarı var."
 | | |
 |---|---|
 | 🌙 **Bekleme modu** | Mikrofon açık ama dışarı tek bayt ses gitmez. Uyandırma kelimesi ("Jarvis", değiştirilebilir) cihaz içi tanımayla yakalanır. |
-| 🗣️ **Sesli sohbet** | Uyanınca OpenAI Realtime'a bağlanır, "Sizi dinliyorum." der, Türkçe konuşur. Cevaptan sonra 5 saniye sessizlikte uyur. |
+| 🗣️ **Sesli sohbet** | Uyanınca OpenAI Realtime'a bağlanır, "Sizi dinliyorum." der, Türkçe konuşur. Cevaptan sonra 5 saniye sessizlikte uyur. Üç ses hattı: Tam, Ekonomik, Yerel (neredeyse ücretsiz). |
 | 🧑‍💻 **Claude oturumları** | Açık oturumları listeler, durum sorar, görev verir; oturum bitirince özetini okur. Uyuyorsa uyanıp haber verir. |
 | 💬 **Mac görevleri** | WhatsApp, iMessage, Mail, Kişiler, Takvim, uygulama açma, dosya bulma. Gönderme gibi geri alınamaz adımlarda önce "göndereyim mi?" diye sorar. |
 | 🔐 **Sadece sizin sesiniz** | Sesinizin parmak izini yerelde çıkarır, her cümleyi yabancı referans seslerle karşılaştırır. Yabancı ses uyandıramaz, uyandırsa da ilk cümlede elenir. |
@@ -81,7 +82,7 @@ Model: WeSpeaker ResNet34-LM (sherpa-onnx, 16 kHz, 256 boyut). Güvenlik kilidi 
 
 | Ayar | Varsayılan | Not |
 |---|---|---|
-| Model | `gpt-realtime` | `gpt-realtime-mini` üçte bir fiyat, Türkçesi zayıf |
+| Ses hattı | Tam (`gpt-realtime`) | Ekonomik: `gpt-realtime-mini`, üçte bir fiyat, Türkçesi zayıf. Yerel: Apple Türkçe tanıma + `gpt-4o-mini` + Apple sesi; gecikme 1–3 sn, lafı kesmek yok, ses robotik |
 | Ses | `marin` | OpenAI'nin 10 sesi |
 | Uyandırma kelimesi | `Jarvis` | Tanıyıcı İngilizce; yakın yazımlar kabul edilir ("Mikail" → "mikhail") |
 | Mikrofon | Dahili | AirPods mikrofonu kulaklığı telefon kalitesine düşürür; ses yine kulaklıktan çalar |
@@ -94,6 +95,7 @@ Model: WeSpeaker ResNet34-LM (sherpa-onnx, 16 kHz, 256 boyut). Güvenlik kilidi 
 |---|---|---|
 | gpt-realtime | ~0,05–0,10 $ | ~2–3 $ |
 | gpt-realtime-mini | ~0,02 $ | ~0,5–1 $ |
+| Yerel hat | tur başına < 0,001 $ | birkaç sent |
 
 Beklemede ve sessizlikte ücret işlemez. Uyandırma kelimesi ve konuşmacı tanıma tamamen yereldir. Kohort üretimi tek seferlik, birkaç sent.
 
@@ -118,8 +120,8 @@ Beklemede ve sessizlikte ücret işlemez. Uyandırma kelimesi ve konuşmacı tan
 
 ## Yol haritası
 
-- [ ] Ucuz ses hattı: tamamen yerel (Apple konuşma tanıma + Türkçe sistem sesi), sıfır maliyet
-- [ ] Vardiya'nın 3D ofisine entegrasyon: "şu masadaki Claude'a söyle"
+- [x] Ucuz ses hattı: Apple konuşma tanıma + küçük metin modeli + Türkçe sistem sesi
+- [ ] Tamamen çevrimdışı hat: yerel metin modeli ile sıfır maliyet
 - [ ] Global kısayol ile uyandırma
 
 ## Geliştirme
@@ -130,4 +132,4 @@ Beklemede ve sessizlikte ücret işlemez. Uyandırma kelimesi ve konuşmacı tan
 
 ## Lisans
 
-© 2026 Rodosgrup Yazılım Ekibi
+MIT · © 2026 Rodosgrup Yazılım Ekibi. Ayrıntı için [LICENSE](LICENSE).

@@ -1,8 +1,9 @@
 import Foundation
+import AVFoundation
 
 /// OpenAI Realtime API'ye WebSocket bağlantısı. Ses gönderir, ses ve olay alır.
 /// Olaylar ham sözlük olarak dışarı verilir; yorumlama AppState'te.
-final class RealtimeClient: NSObject, URLSessionWebSocketDelegate {
+final class RealtimeClient: NSObject, URLSessionWebSocketDelegate, VoiceClient {
     private var task: URLSessionWebSocketTask?
     private lazy var session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
 
@@ -34,6 +35,8 @@ final class RealtimeClient: NSObject, URLSessionWebSocketDelegate {
             if let err { self?.onClose("gönderim hatası: \(err.localizedDescription)") }
         }
     }
+
+    func feed(_ buffer: AVAudioPCMBuffer) { /* Realtime ham tamponu kullanmaz */ }
 
     func appendAudio(_ pcm16: Data) {
         send(["type": "input_audio_buffer.append", "audio": pcm16.base64EncodedString()])

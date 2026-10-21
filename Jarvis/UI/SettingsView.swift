@@ -4,7 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var state: AppState
     @State private var apiKey = Prefs.apiKey
-    @State private var model = Prefs.model
+    @State private var pipeline = Prefs.pipeline
     @State private var voice = Prefs.voice
     @State private var wakeWord = Prefs.wakeWord
     @State private var inputUID = Prefs.inputDeviceUID
@@ -20,8 +20,8 @@ struct SettingsView: View {
         Form {
             Section("OpenAI") {
                 SecureField("API anahtarı", text: $apiKey)
-                Picker("Model", selection: $model) {
-                    ForEach(Prefs.models, id: \.self) { Text($0) }
+                Picker("Ses hattı", selection: $pipeline) {
+                    ForEach(Prefs.pipelines, id: \.id) { Text($0.label).tag($0.id) }
                 }
                 Picker("Ses", selection: $voice) {
                     ForEach(Prefs.voices, id: \.self) { Text($0) }
@@ -33,7 +33,7 @@ struct SettingsView: View {
                 }
                 Text("AirPods mikrofonu kulaklığı telefon kalitesine düşürür ve ses profilini bozar; ses yine kulaklıktan çalar, mikrofon Mac'te kalsın. Değişiklik Dinle'yi kapatıp açınca geçerli olur.")
                     .font(.caption).foregroundStyle(.secondary)
-                Text("Mini ucuz ve yeterli; tam model daha doğal konuşur ama 3 kat pahalı. Değişiklik bir sonraki bağlantıda geçerli olur.")
+                Text("Tam ve Ekonomik hatlarda ses doğrudan OpenAI'ye gider, cevap anında gelir, lafı kesebilirsiniz. Yerel hatta konuşmanız Apple'ın Türkçe tanımasıyla metne çevrilir, küçük bir metin modeli cevaplar, Apple'ın Türkçe sesi okur: gecikme 1–3 sn, lafı kesmek yok, ses robotik; maliyet tur başına kuruşun altı. Değişiklik bir sonraki uyanışta geçerli olur.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Ses tanıma") {
@@ -78,7 +78,8 @@ struct SettingsView: View {
 
     private func save() {
         Prefs.apiKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        Prefs.model = model
+        Prefs.pipeline = pipeline
+        Prefs.model = pipeline == "mini" ? "gpt-realtime-mini" : "gpt-realtime"
         SpeakerVerifier.enabled = speakerGate
         Prefs.voice = voice
         Prefs.inputDeviceUID = inputUID

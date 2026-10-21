@@ -39,7 +39,10 @@ final class AppState: ObservableObject {
     }
 
     private let audio = AudioEngine()
-    private let realtime = RealtimeClient()
+    /// Seçili ses hattı: Realtime (OpenAI) ya da yerel. Uyanışta Prefs.pipeline'a göre seçilir.
+    private var realtime: VoiceClient = RealtimeClient()
+    private let realtimeClient = RealtimeClient()
+    private let localClient = LocalVoiceSession()
     private let wake = WakeWord()
     private let watcher = Watcher()
     private var orchestrator: Orchestrator
@@ -83,8 +86,12 @@ final class AppState: ObservableObject {
         watcher.onEvent = { [weak self] in self?.handle($0) }
         watcher.start()
 
-        realtime.onEvent = { [weak self] ev in Task { @MainActor in self?.handle(ev) } }
-        realtime.onClose = { [weak self] why in Task { @MainActor in self?.connectionClosed(why) } }
+        for c in [realtimeClient as VoiceClient, localClient as VoiceClient] {
+            c.onEvent = { [weak self] ev in Task { @MainActor in self?.handle(ev) } }
+            c.onClose = { [weak self] why in Task { @MainActor in self?.connectionClosed(why) } }
+        }
+        localClient.log = { Self.logToFile("[system] \($0)") }
+        realtime = realtimeClient
 
         audio.log = { Self.logToFile("[system] \($0)") }
         audio.onPlaybackIdle = { [weak self] in
@@ -95,7 +102,12 @@ final class AppState: ObservableObject {
                 self.justWoke = false
             }
         }
-        audio.onRawBuffer = { [weak self] buf in self?.wake.feed(buf) }
+        audio.onRawBuffer = { [weak self] buf in
+            guard let self else { return }
+            self.wake.feed(buf)
+            // Yerel hat ham tamponu kullanır; Jarvis konuşurken yutulur.
+            if self.isAwake && !self.audio.shouldMuteMic { self.realtime.feed(buf) }
+        }
         audio.onChunk = { [weak self] d in
             guard let self else { return }
             self.chunkCount += 1
@@ -212,7 +224,8 @@ final class AppState: ObservableObject {
         pendingAudio = []
         justWokeUtterance = true
         sessionTrusted = false
-        add(.system, "Uyandı, bağlanıyor.")
+        realtime = Prefs.pipeline == "local" ? localClient : realtimeClient
+        add(.system, "Uyandı, bağlanıyor (\(Prefs.pipeline == "local" ? "yerel hat" : Prefs.model)).")
         realtime.connect(apiKey: key, model: Prefs.model, sessionConfig: Prompt.sessionConfig(voice: Prefs.voice))
     }
 
