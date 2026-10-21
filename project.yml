@@ -1,0 +1,53 @@
+name: Jarvis
+options:
+  bundleIdPrefix: com.batuhanhaymana
+  deploymentTarget:
+    macOS: "15.0"
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: 4U5QVH3U6A
+targets:
+  Jarvis:
+    type: application
+    platform: macOS
+    sources:
+      - path: Jarvis
+      # Konuşmacı modeli uygulama paketine kopyalanır (scripts/fetch-vendor.sh indirir).
+      - path: vendor/models/speaker.onnx
+        buildPhase: resources
+    dependencies:
+      # sherpa-onnx (konuşmacı doğrulama) ve onnxruntime; pakete gömülür ve kopyalanırken imzalanır.
+      - framework: vendor/sherpa-onnx/lib/libsherpa-onnx-c-api.dylib
+        embed: true
+      - framework: vendor/sherpa-onnx/lib/libonnxruntime.dylib
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.batuhanhaymana.jarvis
+        PRODUCT_NAME: Jarvis
+        INFOPLIST_KEY_CFBundleDisplayName: Jarvis
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Rodosgrup Yazılım Ekibi"
+        # Menü çubuğu uygulaması: Dock'ta görünmez.
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: "Jarvis, sesli komutla WhatsApp, Mail, Mesajlar ve Kişiler gibi uygulamaları kullanmak için onları kontrol eder."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Jarvis, beklemedeyken uyandırma kelimesini (\"Jarvis\") cihaz içi konuşma tanımayla yakalar; ses dışarı gönderilmez."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Jarvis sizi dinleyip Claude oturumlarına sesle görev vermeniz için mikrofonu kullanır."
+        GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Sandbox kapalı: ~/.claude altındaki oturum kayıtlarını okuyor ve claude komutunu çalıştırıyoruz.
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Jarvis/Resources/Jarvis.entitlements
+        SWIFT_OBJC_BRIDGING_HEADER: Jarvis/Resources/Jarvis-Bridging-Header.h
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/vendor/sherpa-onnx/include"
+        LIBRARY_SEARCH_PATHS: "$(SRCROOT)/vendor/sherpa-onnx/lib"
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+        # Gömülü dylib'ler sertleştirilmiş çalışma zamanında yüklenebilsin.
+        OTHER_CODE_SIGN_FLAGS: "--timestamp=none"
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
